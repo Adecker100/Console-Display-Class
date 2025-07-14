@@ -9,29 +9,35 @@ using namespace std;
 ConsoleDisplay::ConsoleDisplay() {
 	screenWidth = 150;
 	screenHeight = 50;
-	screenBuffer.resize(screenWidth);
-	previousFrame.resize(screenWidth);
+	bufferSize = screenWidth * screenHeight;
+	screenBuffer = new CHAR_INFO[bufferSize];
+	previousFrame = new CHAR_INFO[bufferSize];
 
 
-	for (int x = 0; x < screenBuffer.size(); x++) {
-		screenBuffer.at(x).resize(screenHeight, Pixel{ '+', 15 });
-		previousFrame.at(x).resize(screenHeight, Pixel{ ' ', 15 });
+	for (int i = 0; i < bufferSize; i++) {
+		screenBuffer[i].Char.UnicodeChar = '+';
+		screenBuffer[i].Attributes = (0 << 4 | 15);
+		previousFrame[i].Char.UnicodeChar = '+';
+		previousFrame[i].Attributes = (0 << 4 | 15);
 	}
 }
 
 ConsoleDisplay::ConsoleDisplay(int newScreenWidth, int newScreenHeight) {
 	screenWidth = newScreenWidth;
 	screenHeight = newScreenHeight;
-	screenBuffer.resize(screenWidth);
-	previousFrame.resize(screenWidth);
+	bufferSize = screenWidth * screenHeight;
+	screenBuffer = new CHAR_INFO[bufferSize];
+	previousFrame = new CHAR_INFO[bufferSize];
 
-	for (int x = 0; x < screenBuffer.size(); x++) {
-		screenBuffer.at(x).resize(screenHeight, Pixel{ '+', 15 });
-		previousFrame.at(x).resize(screenHeight, Pixel{ ' ', 15 });
+	for (int i = 0; i < bufferSize; i++) {
+		screenBuffer[i].Char.UnicodeChar = '+';
+		screenBuffer[i].Attributes = (0 << 4 | 15);
+		previousFrame[i].Char.UnicodeChar = '+';
+		previousFrame[i].Attributes = (0 << 4 | 15);
 	}
 }
 
-void ConsoleDisplay::addGraphic(int graphicX, int graphicY, string fileName, int graphicColor) {
+void ConsoleDisplay::addGraphic(int graphicX, int graphicY, string fileName, int graphicForegroundColor, int graphicBackgroundColor) {
 
 	if (!(graphicX >= 0 && graphicY >= 0)) {
 		throw runtime_error("addGraphic command incorrect, graphicX: " + to_string(graphicX) + " graphicY: " + to_string(graphicY));
@@ -63,34 +69,36 @@ void ConsoleDisplay::addGraphic(int graphicX, int graphicY, string fileName, int
 				tempChar = fileInput.get();
 			}
 			if (tempChar != ' ') {
-				screenBuffer.at(x).at(y).character = tempChar;
-				screenBuffer.at(x).at(y).foregroundColor = graphicColor;
+				screenBuffer[y * screenWidth + x].Char.UnicodeChar = tempChar;
+				screenBuffer[y * screenWidth + x].Attributes = (0 << 4 | 15);
 			}
 		}
 	}
 }
 
-void ConsoleDisplay::addString(int stringX, int stringY, string inputString, int stringBackgroundColor, int stringForegroundColor) {
+void ConsoleDisplay::addString(int stringX, int stringY, string inputString, int stringForegroundColor, int stringBackgroundColor) {
 	for (int x = 0; x < inputString.size(); x++) {
-		screenBuffer.at(stringX + x).at(stringY).character = inputString[x];
-		screenBuffer.at(stringX + x).at(stringY).foregroundColor = stringForegroundColor;
-		screenBuffer.at(stringX + x).at(stringY).foregroundColor = stringBackgroundColor;
+		screenBuffer[stringY * screenWidth + (stringX + x)].Char.UnicodeChar = inputString[x];
+		screenBuffer[stringY * screenWidth + (stringX + x)].Attributes = (stringBackgroundColor << 4 | stringForegroundColor);
 	}
 }
 
 void ConsoleDisplay::drawScreen() {
-	for (int y = 0; y < screenHeight; y++) {
-		for (int x = 0; x < screenWidth; x++) {
-			if (screenBuffer.at(x).at(y).character != previousFrame.at(x).at(y).character || screenBuffer.at(x).at(y).foregroundColor != previousFrame.at(x).at(y).foregroundColor) {
-				setConCurPosition(x, y, screenBuffer.at(x).at(y).foregroundColor, 69);
-				cout << screenBuffer.at(x).at(y).character;
-			}
-		}
+	
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	if (console == INVALID_HANDLE_VALUE || console == NULL) {
+		throw runtime_error("Console handle is invalid!");
 	}
-	for (int y = 0; y < screenHeight; y++) {
-		for (int x = 0; x < screenWidth; x++) {
-			previousFrame.at(x).at(y) = screenBuffer.at(x).at(y);
-		}
+
+	CHAR_INFO* screenBufferPtr = screenBuffer;
+	COORD screenSize{ screenWidth, screenHeight };
+	SMALL_RECT* screenRect = new SMALL_RECT{ 0,0,SHORT(screenWidth - 1),SHORT(screenHeight - 1) };
+
+	WriteConsoleOutputW(console, screenBufferPtr, screenSize, { 0,0 }, screenRect);
+
+	for (int i = 0; i < bufferSize; i++) {
+		previousFrame[i] = screenBuffer[i];
 	}
 }
 
@@ -98,12 +106,12 @@ void ConsoleDisplay::addBorder(char borderChar, int borderForegroundColor, int b
 	for (int y = 0; y < screenHeight; y++) {
 		for (int x = 0; x < screenWidth; x++) {
 			if (y == 0 || y == (screenHeight - 1)) {
-				screenBuffer.at(x).at(y).character = borderChar;
-				screenBuffer.at(x).at(y).foregroundColor = borderForegroundColor;
+				screenBuffer[y * screenWidth + x].Char.UnicodeChar = borderChar;
+				screenBuffer[y * screenWidth + x].Attributes = (0 << 4 | 15);
 			}
 			if (x == 0 || x == (screenWidth - 1)) {
-				screenBuffer.at(x).at(y).character = borderChar;
-				screenBuffer.at(x).at(y).foregroundColor = borderForegroundColor;
+				screenBuffer[y * screenWidth + x].Char.UnicodeChar = borderChar;
+				screenBuffer[y * screenWidth + x].Attributes = (0 << 4 | 15);
 			}
 		}
 	}
@@ -115,10 +123,9 @@ void ConsoleDisplay::clearScreen() {
 }
 
 void ConsoleDisplay::clearScreenBuffer() {
-	for (int x = 0; x < screenBuffer.size(); x++) {
-		for (int y = 0; y < screenBuffer.at(x).size(); y++) {
-			screenBuffer.at(x).at(y) = Pixel{ ' ', 15 };
-		}
+	for (int i = 0; i < bufferSize; i++) {
+		screenBuffer[i].Char.UnicodeChar = ' ';
+		screenBuffer[i].Attributes = (0 << 4 | 15);
 	}
 }
 

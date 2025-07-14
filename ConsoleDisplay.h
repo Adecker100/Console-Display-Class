@@ -1,31 +1,27 @@
 #pragma once
 
+#include <Windows.h>
 #include <vector>
 #include <string>
 
 using namespace std;
 
-struct Pixel {
-	char character;
-	uint8_t backgroundColor;
-	uint8_t foregroundColor;
-};
-
 class ConsoleDisplay {
 public:
 	ConsoleDisplay();
-	ConsoleDisplay(int, int);
-	void addGraphic(int, int, string, int);
-	void addString(int, int, string, int, int);
+	ConsoleDisplay(int newScreenWidth, int newScreenHeight);
+	void addGraphic(int graphicX, int graphicY, string fileName, int graphicForegroundColor, int graphicBackgroundColor);
+	void addString(int stringX, int stringY, string inputString, int stringForegroundColor, int stringBackgroundColor);
 	void drawScreen();
-	void addBorder(char, int, int);
+	void addBorder(char borderChar, int borderForegroundColor, int borderBackgroundColor);
 	void clearScreen();
 	void clearScreenBuffer();
+	void setConCurPosition(int conX, int conY, int conForegroundColor, int conBackgroundColor);
 private:
 	int screenWidth;
 	int screenHeight;
-	vector<vector<Pixel>> screenBuffer;
-	vector<vector<Pixel>> previousFrame;
-	void setConCurPosition(int, int, int, int);
+	int bufferSize;
+	CHAR_INFO* screenBuffer = nullptr;
+	CHAR_INFO* previousFrame = nullptr;
 };
 
