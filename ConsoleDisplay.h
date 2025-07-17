@@ -17,6 +17,8 @@ public:
 	void clearScreen();
 	void clearScreenBuffer();
 	void setConCurPosition(int conX, int conY, int conForegroundColor, int conBackgroundColor);
+	void addRect(int cornerX, int cornerY, int rectWidth, int rectHeight, bool solid, char rectChar, int rectForegroundColor, int rectBackgroundColor);
+	void addLine(int x1, int y1, int x2, int y2, char lineChar, int lineForegroundColor, int lineBackgroundColor);
 private:
 	int screenWidth;
 	int screenHeight;
