@@ -36,7 +36,7 @@ int main() {
 			}
 			*/
 
-			screen1.addLine(coordXRange(gen), coordYRange(gen), coordXRange(gen), coordYRange(gen), ' ', colorRange(gen), colorRange(gen));
+			//screen1.addLine(coordXRange(gen), coordYRange(gen), coordXRange(gen), coordYRange(gen), ' ', colorRange(gen), colorRange(gen));
 			screen1.addString(80, 40, "FPS:" + to_string(framesPerSecond), 0, 15);
 			screen1.drawScreen();
 			frames++;
