@@ -1,46 +1,148 @@
-Welcome to the Windows Console Display Class! (Which works on the Windows console pre-Windows 11, since that's when they decided to change everything)
+# Windows Console Display Class
 
-This class gives you the ability to, with relative ease, draw rectangles, lines, borders, of any character and color in the Windows console!
-Simply add the header file to your program and you can use these easy commands!
+A lightweight C++ class for drawing graphics directly in the Windows Console using the Windows Console API.
 
+> ⚠️ Designed for the classic Windows Console (pre-Windows 11 console redesign).
 
-There are currently 10 custom commands:
+This class allows you to easily draw:
 
-ConsoleDisplay(new Screen Width, new Screen Height)
+* Rectangles
+* Lines
+* Borders
+* Strings
+* Custom graphics
+* Colored text elements
 
+All using `CHAR_INFO` buffers and the Windows Console API.
+
+---
+
+## Getting Started
+
+Simply include the header file in your project:
+
+```cpp
+#include "ConsoleDisplay.h"
+```
+
+Create a display instance:
+
+```cpp
+ConsoleDisplay display(screenWidth, screenHeight);
+```
+
+Then use the provided drawing functions and call:
+
+```cpp
+display.drawScreen();
+```
+
+---
+
+## Available Commands
+
+### Constructor
+
+```cpp
+ConsoleDisplay(screenWidth, screenHeight)
+```
+
+Creates a new console display with the specified dimensions.
+
+---
+
+### Drawing Functions
+
+```cpp
 addGraphic(graphicX, graphicY, fileName, graphicForegroundColor, graphicBackgroundColor)
+```
 
+Draws a graphic from a file at the specified coordinates.
+
+```cpp
 addString(stringX, stringY, inputString, stringForegroundColor, stringBackgroundColor)
+```
 
-drawScreen()
+Draws a string at the specified location.
 
-addBorder(borderChar, borderForegroundColor, borderBackgroundColor)
-
-clearScreen()
-
-clearScreenBuffer()
-
-setConCurPosition(conX, conY, conForegroundColor, conBackgroundColor)
-
+```cpp
 addRect(cornerX, cornerY, rectWidth, rectHeight, solid, rectChar, rectForegroundColor, rectBackgroundColor)
+```
 
+Draws a rectangle (solid or outline).
+
+```cpp
 addLine(x1, y1, x2, y2, lineChar, lineForegroundColor, lineBackgroundColor)
+```
 
+Draws a line between two points using an integer line algorithm.
 
-The Console Display Class uses the Windows Console API enum system for colors, where each color is represented by an integer:
-0  Black
-1  DarkBlue
-2  DarkGreen
-3  DarkCyan
-4  DarkRed
-5  DarkMagenta
-6  DarkYellow
-7  Gray
-8  DarkGray
-9  Blue
-10 Green
-11 Cyan
-12 Red
-13 Magenta
-14 Yellow
-15 White
+```cpp
+addBorder(borderChar, borderForegroundColor, borderBackgroundColor)
+```
+
+Draws a border around the screen.
+
+---
+
+### Screen Control
+
+```cpp
+drawScreen()
+```
+
+Renders the screen buffer to the console.
+
+```cpp
+clearScreen()
+```
+
+Clears the console screen.
+
+```cpp
+clearScreenBuffer()
+```
+
+Clears the internal drawing buffer.
+
+```cpp
+setConCurPosition(conX, conY, conForegroundColor, conBackgroundColor)
+```
+
+Sets the console cursor position and colors.
+
+---
+
+## Color System
+
+The class uses the Windows Console API color enum values:
+
+| Value | Color       |
+| ----- | ----------- |
+| 0     | Black       |
+| 1     | DarkBlue    |
+| 2     | DarkGreen   |
+| 3     | DarkCyan    |
+| 4     | DarkRed     |
+| 5     | DarkMagenta |
+| 6     | DarkYellow  |
+| 7     | Gray        |
+| 8     | DarkGray    |
+| 9     | Blue        |
+| 10    | Green       |
+| 11    | Cyan        |
+| 12    | Red         |
+| 13    | Magenta     |
+| 14    | Yellow      |
+| 15    | White       |
+
+Foreground and background colors are combined using bitwise operations internally.
+
+---
+
+## Notes
+
+* Uses `CHAR_INFO` buffers for double buffering.
+* Optimized integer-based line and circle drawing.
+* Designed for classic Windows Console behavior.
+* No external dependencies beyond `<windows.h>`.
